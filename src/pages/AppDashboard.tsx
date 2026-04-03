@@ -244,6 +244,7 @@ const AppDashboard = () => {
           <div className="flex gap-1">
             <button className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Mic size={16} /></button>
             <button className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Headphones size={16} /></button>
+            <button onClick={() => navigate("/settings")} className="p-1 text-muted-foreground hover:text-foreground transition-colors" title="Settings"><Settings size={16} /></button>
             <button onClick={() => { signOut(); navigate("/"); }} className="p-1 text-muted-foreground hover:text-destructive transition-colors" title="Log out"><LogOut size={16} /></button>
           </div>
         </div>
