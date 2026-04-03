@@ -1,4 +1,5 @@
 import { ArrowRight, Download } from "lucide-react";
+import logo from "/logo.png";
 
 const footerLinks = {
   Product: ["Download", "Nitro", "Status", "App Directory", "Activities"],
@@ -63,9 +64,7 @@ const Footer = () => {
           {/* Divider */}
           <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg gradient-blurple flex items-center justify-center font-bold text-primary-foreground text-sm">
-                N8
-              </div>
+              <img src={logo} alt="N8 logo" className="w-8 h-8 rounded-lg" width={32} height={32} loading="lazy" />
               <span className="font-bold text-lg text-foreground">N8</span>
             </div>
 
