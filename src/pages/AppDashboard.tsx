@@ -252,57 +252,97 @@ const AppDashboard = () => {
 
       {/* Main chat */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="h-12 px-4 flex items-center gap-3 border-b border-border shadow-sm flex-shrink-0">
-          <Hash size={20} className="text-muted-foreground" />
-          <span className="font-bold text-foreground">{activeChannelData?.name || "general"}</span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {messages.length === 0 && activeChannel && (
-            <div className="text-center text-muted-foreground text-sm py-12">
-              <p className="text-lg mb-1">Welcome to #{activeChannelData?.name}!</p>
-              <p>This is the beginning of this channel. Say hi! 👋</p>
+        {!activeServer ? (
+          /* Home / Welcome view */
+          <>
+            <div className="h-12 px-4 flex items-center gap-3 border-b border-border shadow-sm flex-shrink-0">
+              <Home size={20} className="text-muted-foreground" />
+              <span className="font-bold text-foreground">Home</span>
             </div>
-          )}
-          {messages.map((msg: any, i: number) => (
-            <motion.div
-              key={msg.id}
-              className="flex gap-3 group hover:bg-secondary/30 -mx-4 px-4 py-1 rounded"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
-            >
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5 text-primary-foreground">
-                {(msg.profile?.display_name || msg.profile?.username || "U")[0].toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-medium text-foreground text-sm">{msg.profile?.display_name || msg.profile?.username}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {new Date(msg.created_at).toLocaleString()}
-                  </span>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center max-w-md px-6">
+                <div className="w-20 h-20 rounded-full gradient-blurple flex items-center justify-center mx-auto mb-6">
+                  <Users size={36} className="text-primary-foreground" />
                 </div>
-                <p className="text-sm text-secondary-foreground leading-relaxed">{msg.content}</p>
+                <h2 className="text-2xl font-bold text-foreground mb-3">Welcome to N8!</h2>
+                <p className="text-muted-foreground mb-6">Create a server, join one with an invite code, or add friends to get started.</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button
+                    onClick={() => setModalOpen(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full gradient-blurple text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+                  >
+                    <Plus size={16} /> Create Server
+                  </button>
+                  <button
+                    onClick={() => setFriendsOpen(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
+                  >
+                    <UserPlus size={16} /> Add Friends
+                  </button>
+                  <button
+                    onClick={() => navigate("/settings")}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
+                  >
+                    <Settings size={16} /> Settings
+                  </button>
+                </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {activeChannel && (
-          <div className="px-4 pb-4">
-            <div className="flex items-center gap-2 bg-secondary rounded-lg px-4 py-2">
-              <input
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder={`Message #${activeChannelData?.name || "general"}`}
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-              />
-              <button onClick={handleSend} className="text-muted-foreground hover:text-foreground transition-colors">
-                <Send size={20} />
-              </button>
             </div>
-          </div>
+          </>
+        ) : (
+          /* Server chat view */
+          <>
+            <div className="h-12 px-4 flex items-center gap-3 border-b border-border shadow-sm flex-shrink-0">
+              <Hash size={20} className="text-muted-foreground" />
+              <span className="font-bold text-foreground">{activeChannelData?.name || "general"}</span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+              {messages.length === 0 && activeChannel && (
+                <div className="text-center text-muted-foreground text-sm py-12">
+                  <p className="text-lg mb-1">Welcome to #{activeChannelData?.name}!</p>
+                  <p>This is the beginning of this channel. Say hi! 👋</p>
+                </div>
+              )}
+              {messages.map((msg: any, i: number) => (
+                <motion.div
+                  key={msg.id}
+                  className="flex gap-3 group hover:bg-secondary/30 -mx-4 px-4 py-1 rounded"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.02 }}
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5 text-primary-foreground">
+                    {(msg.profile?.display_name || msg.profile?.username || "U")[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-medium text-foreground text-sm">{msg.profile?.display_name || msg.profile?.username}</span>
+                      <span className="text-[10px] text-muted-foreground">{new Date(msg.created_at).toLocaleString()}</span>
+                    </div>
+                    <p className="text-sm text-secondary-foreground leading-relaxed">{msg.content}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {activeChannel && (
+              <div className="px-4 pb-4">
+                <div className="flex items-center gap-2 bg-secondary rounded-lg px-4 py-2">
+                  <input
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    placeholder={`Message #${activeChannelData?.name || "general"}`}
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  />
+                  <button onClick={handleSend} className="text-muted-foreground hover:text-foreground transition-colors">
+                    <Send size={20} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
