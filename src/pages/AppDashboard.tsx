@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Hash, Volume2, Settings, Smile, Send, Mic, Headphones, Users, Search, Bell, UserPlus, LogOut, Copy } from "lucide-react";
+import { Plus, Hash, Volume2, Settings, Smile, Send, Mic, Headphones, Users, Search, Bell, UserPlus, LogOut, Copy, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
