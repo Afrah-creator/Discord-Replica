@@ -3,6 +3,7 @@ import { Download, ArrowRight } from "lucide-react";
 import heroCrystals from "@/assets/hero-crystals.jpg";
 import mascot from "@/assets/mascot.png";
 import appMockup from "@/assets/app-mockup.png";
+import logo from "/logo.png";
 
 const Hero = () => {
   return (
