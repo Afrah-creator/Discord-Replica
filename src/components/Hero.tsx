@@ -20,9 +20,9 @@ const Hero = () => {
 
       {/* Navbar */}
       <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-4">
-        <div className="flex items-center gap-2">
-          <img src={logo} alt="N8 logo" className="w-8 h-8 rounded-lg" width={32} height={32} />
-          <span className="font-bold text-lg text-foreground">N8</span>
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="N8 logo" className="w-10 h-10" width={40} height={40} />
+          <span className="font-extrabold text-xl text-foreground tracking-tight">N8</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
           <a href="#" className="hover:text-foreground transition-colors">Download</a>

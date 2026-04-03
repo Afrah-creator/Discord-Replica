@@ -63,9 +63,9 @@ const Footer = () => {
 
           {/* Divider */}
           <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="N8 logo" className="w-8 h-8 rounded-lg" width={32} height={32} loading="lazy" />
-              <span className="font-bold text-lg text-foreground">N8</span>
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="N8 logo" className="w-10 h-10" width={40} height={40} loading="lazy" />
+              <span className="font-extrabold text-xl text-foreground tracking-tight">N8</span>
             </div>
 
             {/* Social links */}
