@@ -126,6 +126,20 @@ const AppDashboard = () => {
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       {/* Server sidebar */}
       <div className="w-[72px] flex-shrink-0 bg-darker-navy flex flex-col items-center py-3 gap-2 overflow-y-auto">
+        {/* Home button */}
+        <button
+          onClick={() => { setActiveServer(null); setActiveChannel(null); }}
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all hover:rounded-xl ${
+            !activeServer ? "gradient-blurple rounded-xl" : "bg-secondary hover:bg-primary"
+          }`}
+          title="Home"
+        >
+          <Home className="text-foreground" size={20} />
+        </button>
+
+        <div className="w-8 h-0.5 bg-border rounded-full my-1" />
+
+        {/* Friends button */}
         <button
           onClick={() => setFriendsOpen(true)}
           className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all hover:rounded-xl bg-secondary hover:bg-primary"
