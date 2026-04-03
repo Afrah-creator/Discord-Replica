@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
-import { Download, Monitor, Smartphone, Apple, Chrome } from "lucide-react";
+import { Plus, UserPlus, ArrowRight, Users, MessageSquare, Shield } from "lucide-react";
 
-const platforms = [
-  { icon: Monitor, name: "Windows", button: "Download", primary: true },
-  { icon: Apple, name: "macOS", button: "Download", primary: false },
-  { icon: Smartphone, name: "iOS", button: "App Store", primary: false },
-  { icon: Smartphone, name: "Android", button: "Google Play", primary: false },
-  { icon: Monitor, name: "Linux", button: "Download", primary: false },
-  { icon: Chrome, name: "Web Browser", button: "Open N8", primary: false },
+const actions = [
+  { icon: Plus, name: "Create a Server", desc: "Start your own community", href: "/auth", primary: true },
+  { icon: UserPlus, name: "Add Friends", desc: "Find and connect with people", href: "/auth", primary: false },
+  { icon: Users, name: "Join a Server", desc: "Use an invite code", href: "/auth", primary: false },
+  { icon: MessageSquare, name: "Start Chatting", desc: "Send your first message", href: "/app", primary: false },
+  { icon: Shield, name: "Stay Safe", desc: "Built-in moderation tools", href: "#", primary: false },
+  { icon: ArrowRight, name: "Open N8", desc: "Jump right in", href: "/app", primary: true },
 ];
 
 const DownloadSection = () => {
@@ -21,20 +21,20 @@ const DownloadSection = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
-            DOWNLOAD N8 ON ANY DEVICE
+            GET STARTED WITH N8
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Available on Windows, macOS, Linux, iOS, Android, and your web browser. Always stay connected.
+            Create servers, add friends, and start chatting — all from your browser. No downloads needed.
           </p>
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-          {platforms.map((p, i) => (
+          {actions.map((a, i) => (
             <motion.a
-              key={p.name}
-              href={p.name === "Web Browser" ? "/app" : "#"}
+              key={a.name}
+              href={a.href}
               className={`flex flex-col items-center gap-3 p-6 rounded-xl border transition-all hover:scale-[1.03] ${
-                p.primary
+                a.primary
                   ? "gradient-blurple border-transparent glow-blurple text-primary-foreground"
                   : "bg-card border-border hover:border-primary/30 text-foreground"
               }`}
@@ -43,12 +43,9 @@ const DownloadSection = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.07 }}
             >
-              <p.icon size={32} />
-              <span className="font-bold text-sm">{p.name}</span>
-              <span className="flex items-center gap-1 text-xs opacity-80">
-                <Download size={12} />
-                {p.button}
-              </span>
+              <a.icon size={32} />
+              <span className="font-bold text-sm">{a.name}</span>
+              <span className="text-xs opacity-80">{a.desc}</span>
             </motion.a>
           ))}
         </div>
