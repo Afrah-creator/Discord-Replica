@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   MessageSquare, Users, Gamepad2, Video, Shield, Zap,
   Bot, Sticker, Globe, Mic, Hash, Bell
@@ -21,17 +22,10 @@ const features = [
 
 const FeaturesGrid = () => {
   return (
-    <section className="py-24 bg-card">
+    <section id="features" className="py-24 bg-card">
       <div className="container mx-auto px-6">
-        <motion.div
-          className="text-center mb-14"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
-            PACKED WITH FEATURES
-          </h2>
+        <motion.div className="text-center mb-14" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">PACKED WITH FEATURES</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Everything you need to run an awesome community — all in one place.
           </p>
@@ -55,6 +49,15 @@ const FeaturesGrid = () => {
             </motion.div>
           ))}
         </div>
+
+        <motion.div className="text-center mt-12" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+          <Link
+            to="/app"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full gradient-blurple text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+          >
+            Try It Now — Free
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
