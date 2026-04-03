@@ -1,4 +1,5 @@
 import { ArrowRight, Download } from "lucide-react";
+import logo from "/logo.png";
 
 const footerLinks = {
   Product: ["Download", "Nitro", "Status", "App Directory", "Activities"],
