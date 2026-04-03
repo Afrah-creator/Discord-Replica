@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Upload, Gamepad2, BookOpen, Users, Sparkles } from "lucide-react";
+import { X, Upload, Gamepad2, BookOpen, Users, Sparkles, Link2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface ServerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onServerCreated?: () => void;
 }
 
 const templates = [
@@ -14,39 +18,85 @@ const templates = [
   { id: "study", label: "Study Group", icon: Users, color: "text-n8-pink" },
 ];
 
-type Step = "template" | "customize";
+type Step = "choose" | "template" | "customize" | "join";
 
-const ServerModal = ({ isOpen, onClose }: ServerModalProps) => {
-  const [step, setStep] = useState<Step>("template");
+const ServerModal = ({ isOpen, onClose, onServerCreated }: ServerModalProps) => {
+  const { user } = useAuth();
+  const [step, setStep] = useState<Step>("choose");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [serverName, setServerName] = useState("");
-  const [serverImage, setServerImage] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleTemplateSelect = (id: string) => {
     setSelectedTemplate(id);
     setStep("customize");
   };
 
-  const handleCreate = () => {
-    console.log("Creating server:", { template: selectedTemplate, name: serverName, image: serverImage });
-    handleClose();
+  const handleCreate = async () => {
+    if (!user || !serverName.trim()) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("servers").insert({
+        name: serverName.trim(),
+        template: selectedTemplate || "own",
+        owner_id: user.id,
+      });
+      if (error) throw error;
+      toast.success(`Server "${serverName}" created!`);
+      onServerCreated?.();
+      handleClose();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create server");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoin = async () => {
+    if (!user || !inviteCode.trim()) return;
+    setLoading(true);
+    try {
+      const { data: server, error: findErr } = await supabase
+        .from("servers")
+        .select("id, name")
+        .eq("invite_code", inviteCode.trim())
+        .maybeSingle();
+      if (findErr) throw findErr;
+      if (!server) {
+        toast.error("Invalid invite code");
+        setLoading(false);
+        return;
+      }
+      const { error: joinErr } = await supabase.from("server_members").insert({
+        server_id: server.id,
+        user_id: user.id,
+      });
+      if (joinErr) {
+        if (joinErr.code === "23505") {
+          toast.info("You're already in this server!");
+        } else {
+          throw joinErr;
+        }
+      } else {
+        toast.success(`Joined "${server.name}"!`);
+      }
+      onServerCreated?.();
+      handleClose();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to join server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
-    setStep("template");
+    setStep("choose");
     setSelectedTemplate(null);
     setServerName("");
-    setServerImage(null);
+    setInviteCode("");
+    setLoading(false);
     onClose();
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setServerImage(reader.result as string);
-      reader.readAsDataURL(file);
-    }
   };
 
   return (
@@ -74,18 +124,39 @@ const ServerModal = ({ isOpen, onClose }: ServerModalProps) => {
             </button>
 
             <AnimatePresence mode="wait">
-              {step === "template" ? (
-                <motion.div
-                  key="template"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="p-6"
-                >
+              {step === "choose" && (
+                <motion.div key="choose" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-6">
+                  <h2 className="text-2xl font-bold text-foreground text-center mb-2">Add a Server</h2>
+                  <p className="text-muted-foreground text-center text-sm mb-6">Create your own or join an existing one</p>
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => setStep("template")}
+                      className="w-full flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors"
+                    >
+                      <Sparkles className="text-n8-yellow" size={24} />
+                      <div className="text-left">
+                        <p className="text-foreground font-medium">Create My Own</p>
+                        <p className="text-muted-foreground text-xs">Start fresh with a new server</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setStep("join")}
+                      className="w-full flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors"
+                    >
+                      <Link2 className="text-blurple" size={24} />
+                      <div className="text-left">
+                        <p className="text-foreground font-medium">Join a Server</p>
+                        <p className="text-muted-foreground text-xs">Enter an invite code to join</p>
+                      </div>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {step === "template" && (
+                <motion.div key="template" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-6">
                   <h2 className="text-2xl font-bold text-foreground text-center mb-2">Create a Server</h2>
-                  <p className="text-muted-foreground text-center text-sm mb-6">
-                    Your server is where you and your friends hang out. Make yours and start talking.
-                  </p>
+                  <p className="text-muted-foreground text-center text-sm mb-6">Pick a template to get started</p>
                   <div className="space-y-2">
                     {templates.map((t) => (
                       <button
@@ -99,58 +170,60 @@ const ServerModal = ({ isOpen, onClose }: ServerModalProps) => {
                       </button>
                     ))}
                   </div>
+                  <button onClick={() => setStep("choose")} className="mt-4 text-sm text-muted-foreground hover:text-foreground">Back</button>
                 </motion.div>
-              ) : (
-                <motion.div
-                  key="customize"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="p-6"
-                >
+              )}
+
+              {step === "customize" && (
+                <motion.div key="customize" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-6">
                   <h2 className="text-2xl font-bold text-foreground text-center mb-2">Customize your server</h2>
-                  <p className="text-muted-foreground text-center text-sm mb-6">
-                    Give your new server a personality with a name and an icon.
-                  </p>
-
-                  <div className="flex justify-center mb-6">
-                    <label className="relative w-20 h-20 rounded-full border-2 border-dashed border-muted-foreground/50 flex items-center justify-center cursor-pointer hover:border-primary transition-colors overflow-hidden">
-                      {serverImage ? (
-                        <img src={serverImage} alt="Server icon" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="flex flex-col items-center text-muted-foreground">
-                          <Upload size={20} />
-                          <span className="text-[10px] mt-1">UPLOAD</span>
-                        </div>
-                      )}
-                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                    </label>
-                  </div>
-
+                  <p className="text-muted-foreground text-center text-sm mb-6">Give your server a name</p>
                   <div className="mb-6">
                     <label className="text-xs font-bold uppercase text-secondary-foreground mb-2 block">Server Name</label>
                     <input
                       type="text"
                       value={serverName}
                       onChange={(e) => setServerName(e.target.value)}
-                      placeholder={`${selectedTemplate === "gaming" ? "My Gaming Server" : selectedTemplate === "school" ? "School Club" : selectedTemplate === "study" ? "Study Group" : "My Server"}`}
+                      placeholder="My Awesome Server"
+                      className="w-full px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setStep("template")} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">Back</button>
+                    <button
+                      onClick={handleCreate}
+                      disabled={!serverName.trim() || loading}
+                      className="ml-auto px-6 py-2 rounded-md gradient-blurple text-primary-foreground text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
+                    >
+                      {loading ? "Creating..." : "Create"}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {step === "join" && (
+                <motion.div key="join" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-6">
+                  <h2 className="text-2xl font-bold text-foreground text-center mb-2">Join a Server</h2>
+                  <p className="text-muted-foreground text-center text-sm mb-6">Enter an invite code below</p>
+                  <div className="mb-6">
+                    <label className="text-xs font-bold uppercase text-secondary-foreground mb-2 block">Invite Code</label>
+                    <input
+                      type="text"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      placeholder="e.g. a1b2c3d4"
                       className="w-full px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
-
                   <div className="flex gap-2">
+                    <button onClick={() => setStep("choose")} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">Back</button>
                     <button
-                      onClick={() => setStep("template")}
-                      className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Back
-                    </button>
-                    <button
-                      onClick={handleCreate}
-                      disabled={!serverName.trim()}
+                      onClick={handleJoin}
+                      disabled={!inviteCode.trim() || loading}
                       className="ml-auto px-6 py-2 rounded-md gradient-blurple text-primary-foreground text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
                     >
-                      Create
+                      {loading ? "Joining..." : "Join Server"}
                     </button>
                   </div>
                 </motion.div>

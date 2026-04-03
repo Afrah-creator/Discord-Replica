@@ -1,48 +1,77 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Download, ArrowRight } from "lucide-react";
+import { Plus, UserPlus, ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import heroCrystals from "@/assets/hero-crystals.jpg";
 import mascot from "@/assets/mascot.png";
 import appMockup from "@/assets/app-mockup.png";
 import logo from "/logo.png";
+import ServerModal from "@/components/ServerModal";
+import FriendsModal from "@/components/FriendsModal";
 
 const Hero = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [serverModalOpen, setServerModalOpen] = useState(false);
+  const [friendsModalOpen, setFriendsModalOpen] = useState(false);
+
+  const handleCreateServer = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setServerModalOpen(true);
+  };
+
+  const handleAddFriends = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setFriendsModalOpen(true);
+  };
+
   return (
     <section className="relative min-h-screen overflow-hidden gradient-hero">
-      {/* Background crystal image */}
       <div className="absolute inset-0 opacity-30">
         <img src={heroCrystals} alt="" className="w-full h-full object-cover" width={1920} height={1080} />
       </div>
 
-      {/* Floating decorative elements */}
       <div className="absolute top-20 left-10 w-16 h-16 rounded-full gradient-blurple opacity-20 animate-float blur-xl" />
       <div className="absolute top-40 right-20 w-24 h-24 rounded-full gradient-blurple opacity-15 animate-float-slow blur-2xl" />
       <div className="absolute bottom-40 left-1/4 w-12 h-12 rounded-full gradient-blurple opacity-25 animate-pulse-glow blur-lg" />
 
-      {/* Navbar */}
       <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-4">
         <div className="flex items-center gap-3">
           <img src={logo} alt="N8 logo" className="w-10 h-10" width={40} height={40} />
           <span className="font-extrabold text-xl text-foreground tracking-tight">N8</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition-colors">Download</a>
-          <a href="#" className="hover:text-foreground transition-colors">Nitro</a>
           <a href="#" className="hover:text-foreground transition-colors">Discover</a>
           <a href="#" className="hover:text-foreground transition-colors">Safety</a>
+          <a href="#" className="hover:text-foreground transition-colors">Nitro</a>
           <a href="#" className="hover:text-foreground transition-colors">Support</a>
         </div>
-        <a
-          href="/app"
-          className="px-4 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          Open N8 in your browser
-        </a>
+        {user ? (
+          <a
+            href="/app"
+            className="px-4 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            Open N8
+          </a>
+        ) : (
+          <a
+            href="/auth"
+            className="px-4 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            Login
+          </a>
+        )}
       </nav>
 
-      {/* Hero content */}
       <div className="relative z-10 container mx-auto px-6 pt-16 md:pt-24 pb-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left - Text */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -59,24 +88,23 @@ const Hero = () => {
               N8 is great for playing games and chilling with friends, or even building a worldwide community. Customize your own space to talk, play, and hang out.
             </p>
             <div className="flex flex-wrap gap-4">
-              <a
-                href="#"
+              <button
+                onClick={handleCreateServer}
                 className="flex items-center gap-2 px-6 py-3 rounded-full bg-foreground text-background font-medium hover:opacity-90 transition-opacity"
               >
-                <Download size={18} />
-                Download for Windows
-              </a>
-              <a
-                href="/app"
+                <Plus size={18} />
+                Create a Server
+              </button>
+              <button
+                onClick={handleAddFriends}
                 className="flex items-center gap-2 px-6 py-3 rounded-full gradient-blurple text-primary-foreground font-medium hover:opacity-90 transition-opacity"
               >
-                Open N8 in your browser
-                <ArrowRight size={18} />
-              </a>
+                <UserPlus size={18} />
+                Add Friends
+              </button>
             </div>
           </motion.div>
 
-          {/* Right - Mockup + Mascot */}
           <motion.div
             className="relative"
             initial={{ opacity: 0, x: 40 }}
@@ -102,6 +130,9 @@ const Hero = () => {
           </motion.div>
         </div>
       </div>
+
+      <ServerModal isOpen={serverModalOpen} onClose={() => setServerModalOpen(false)} />
+      <FriendsModal isOpen={friendsModalOpen} onClose={() => setFriendsModalOpen(false)} />
     </section>
   );
 };

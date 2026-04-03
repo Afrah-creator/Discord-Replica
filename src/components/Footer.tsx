@@ -1,4 +1,6 @@
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight, Plus, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import logo from "/logo.png";
 
 const footerLinks = {
@@ -23,17 +25,17 @@ const Footer = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="#"
+              href="/auth"
               className="flex items-center gap-2 px-8 py-3 rounded-full bg-foreground text-background font-medium hover:opacity-90 transition-opacity"
             >
-              <Download size={18} />
-              Download for Windows
+              <Plus size={18} />
+              Create a Server
             </a>
             <a
               href="/app"
               className="flex items-center gap-2 px-8 py-3 rounded-full gradient-blurple text-primary-foreground font-medium hover:opacity-90 transition-opacity"
             >
-              Open N8 in your browser
+              Open N8
               <ArrowRight size={18} />
             </a>
           </div>
