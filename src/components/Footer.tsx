@@ -1,4 +1,6 @@
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight, Plus, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import logo from "/logo.png";
 
 const footerLinks = {
