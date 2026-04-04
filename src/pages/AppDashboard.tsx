@@ -72,7 +72,6 @@ const AppDashboard = () => {
   const { data: messages = [] } = useQuery({
     queryKey: ["messages", activeChannel],
     enabled: !!activeChannel,
-    refetchInterval: 3000,
     queryFn: async () => {
       const { data } = await supabase
         .from("messages")
@@ -83,6 +82,28 @@ const AppDashboard = () => {
       return data || [];
     },
   });
+
+  // Real-time message subscription
+  useEffect(() => {
+    if (!activeChannel) return;
+    const channel = supabase
+      .channel(`messages-${activeChannel}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannel}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["messages", activeChannel] });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [activeChannel, queryClient]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const { data: members = [] } = useQuery({
     queryKey: ["members", activeServer],
