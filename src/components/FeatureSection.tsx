@@ -4,11 +4,14 @@ import sectionInvite from "@/assets/section-invite.jpg";
 import sectionHangout from "@/assets/section-hangout.jpg";
 import sectionCommunity from "@/assets/section-community.jpg";
 import sectionVoice from "@/assets/section-voice.jpg";
+import sectionVoiceChat from "@/assets/section-voice-chat.jpg";
+import sectionTextChat from "@/assets/section-text-chat.jpg";
 
 interface AlternatingSection {
   title: string;
   description: string;
   image: string;
+  secondaryImage?: string;
   reversed?: boolean;
   bgClass?: string;
   cta: { label: string; href: string };
@@ -19,12 +22,14 @@ const sections: AlternatingSection[] = [
     title: "Create an invite-only place where you belong",
     description: "N8 servers are organized into topic-based channels where you can collaborate, share, and just talk about your day without clogging up a group chat.",
     image: sectionInvite,
+    secondaryImage: sectionTextChat,
     cta: { label: "Create Your Server", href: "/auth" },
   },
   {
     title: "Where hanging out is easy",
     description: "Grab a seat in a voice channel when you're free. Friends in your server can see you're around and instantly pop in to talk without having to call.",
     image: sectionHangout,
+    secondaryImage: sectionVoiceChat,
     reversed: true,
     bgClass: "bg-card",
     cta: { label: "Start Hanging Out", href: "/app" },
@@ -51,7 +56,7 @@ const FeatureSection = () => {
       {sections.map((section, i) => (
         <section key={i} className={`relative py-20 md:py-28 overflow-hidden ${section.bgClass || "bg-background"}`}>
           <div className="container mx-auto px-6">
-            <div className={`grid lg:grid-cols-2 gap-12 items-center ${section.reversed ? "lg:direction-rtl" : ""}`}>
+            <div className={`grid lg:grid-cols-2 gap-12 items-center`}>
               <motion.div
                 className={`${section.reversed ? "lg:order-2" : ""}`}
                 initial={{ opacity: 0, x: section.reversed ? 40 : -40 }}
@@ -70,13 +75,27 @@ const FeatureSection = () => {
               </motion.div>
 
               <motion.div
-                className={`${section.reversed ? "lg:order-1" : ""}`}
+                className={`${section.reversed ? "lg:order-1" : ""} space-y-4`}
                 initial={{ opacity: 0, x: section.reversed ? -40 : 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.15 }}
               >
                 <img src={section.image} alt={section.title} className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
+                {section.secondaryImage && (
+                  <motion.img
+                    src={section.secondaryImage}
+                    alt={`${section.title} detail`}
+                    className="w-full rounded-xl shadow-xl"
+                    loading="lazy"
+                    width={1280}
+                    height={800}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 }}
+                  />
+                )}
               </motion.div>
             </div>
           </div>

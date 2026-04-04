@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Shield, Lock, Eye, UserCheck, AlertTriangle, Ban } from "lucide-react";
 import { Link } from "react-router-dom";
+import safetyImg from "@/assets/section-safety-dashboard.jpg";
 
 const safetyFeatures = [
   { icon: Shield, title: "Advanced Moderation", desc: "AutoMod filters harmful content automatically. Set custom keyword filters and spam protection." },
@@ -24,6 +25,11 @@ const SafetySection = () => {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             We take safety seriously. N8's powerful tools help moderators keep communities welcoming, and give users control over their experience.
           </p>
+        </motion.div>
+
+        {/* Large safety image */}
+        <motion.div className="max-w-4xl mx-auto mb-14" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <img src={safetyImg} alt="N8 Safety & Moderation Dashboard" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
