@@ -1,6 +1,7 @@
 import { ArrowRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "/logo.png";
+import ctaBg from "@/assets/cta-banner-bg.jpg";
 
 const footerLinks: Record<string, { label: string; href: string }[]> = {
   Product: [
@@ -43,9 +44,13 @@ const socialLinks = [
 const Footer = () => {
   return (
     <footer className="relative overflow-hidden">
-      {/* CTA Banner */}
-      <section className="gradient-hero py-24">
-        <div className="container mx-auto px-6 text-center">
+      {/* CTA Banner with cosmic bg */}
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={ctaBg} alt="" className="w-full h-full object-cover" loading="lazy" width={1920} height={600} />
+          <div className="absolute inset-0 bg-background/60" />
+        </div>
+        <div className="relative z-10 container mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-6xl font-black text-foreground mb-4 tracking-tight">
             READY TO START YOUR JOURNEY?
           </h2>
@@ -71,12 +76,10 @@ const Footer = () => {
         </div>
       </section>
 
-      {/* Main Footer — Discord-style dark bottom */}
+      {/* Main Footer */}
       <div className="bg-darker-navy pt-16 pb-8">
         <div className="container mx-auto px-6">
-          {/* Top row: Brand + Link columns */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-10 mb-14">
-            {/* Brand column */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <img src={logo} alt="N8 logo" className="w-12 h-12" width={48} height={48} loading="lazy" />
@@ -85,23 +88,18 @@ const Footer = () => {
               <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-xs">
                 Imagine a place where you can belong to a school club, a gaming group, or a worldwide art community. N8 makes it easy to talk every day and hang out more often.
               </p>
-              {/* Language selector */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-secondary text-muted-foreground text-xs">
                 🌐 English, USA
               </div>
             </div>
 
-            {/* Link columns */}
             {Object.entries(footerLinks).map(([heading, links]) => (
               <div key={heading}>
                 <h4 className="text-blurple font-bold text-xs uppercase tracking-wider mb-4">{heading}</h4>
                 <ul className="space-y-2.5">
                   {links.map((link) => (
                     <li key={link.label}>
-                      <Link
-                        to={link.href}
-                        className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors"
-                      >
+                      <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors">
                         {link.label}
                       </Link>
                     </li>
@@ -111,44 +109,20 @@ const Footer = () => {
             ))}
           </div>
 
-          {/* Divider */}
           <div className="border-t border-border" />
 
-          {/* Bottom bar */}
           <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Left: social icons */}
             <div className="flex items-center gap-3">
               {socialLinks.map((s) => (
-                <a
-                  key={s.name}
-                  href={s.href}
-                  title={s.name}
-                  className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/20 transition-colors text-sm"
-                >
+                <a key={s.name} href={s.href} title={s.name} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/20 transition-colors text-sm">
                   {s.icon}
                 </a>
               ))}
             </div>
-
-            {/* Center: copyright */}
-            <p className="text-xs text-muted-foreground">
-              © 2026 N8. All rights reserved. Not affiliated with Discord Inc.
-            </p>
-
-            {/* Right: Sign up / Open */}
+            <p className="text-xs text-muted-foreground">© 2026 N8. All rights reserved. Not affiliated with Discord Inc.</p>
             <div className="flex items-center gap-3">
-              <Link
-                to="/auth"
-                className="px-5 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/app"
-                className="px-5 py-2 rounded-full gradient-blurple text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                Open N8
-              </Link>
+              <Link to="/auth" className="px-5 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity">Sign Up</Link>
+              <Link to="/app" className="px-5 py-2 rounded-full gradient-blurple text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">Open N8</Link>
             </div>
           </div>
         </div>

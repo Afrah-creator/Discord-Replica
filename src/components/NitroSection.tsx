@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Sparkles, Upload, SmilePlus, Palette, Crown, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
 import sectionNitro from "@/assets/section-nitro.jpg";
+import nitroPromo from "@/assets/section-nitro-promo.jpg";
 
 const perks = [
   { icon: SmilePlus, label: "Custom Emoji Anywhere" },
@@ -32,6 +33,11 @@ const NitroSection = () => {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Boost your N8 experience with bigger uploads, HD streaming, custom emoji, animated avatars, and special profile badges.
           </p>
+        </motion.div>
+
+        {/* Large Nitro promo image */}
+        <motion.div className="max-w-3xl mx-auto mb-14" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
+          <img src={nitroPromo} alt="N8 Nitro Premium Features" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-12">

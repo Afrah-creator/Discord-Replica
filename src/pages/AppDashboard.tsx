@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Hash, Volume2, Settings, Smile, Send, Mic, Headphones, Users, Search, Bell, UserPlus, LogOut, Copy, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ const AppDashboard = () => {
   const [activeServer, setActiveServer] = useState<string | null>(null);
   const [activeChannel, setActiveChannel] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState("");
-
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
@@ -72,7 +72,6 @@ const AppDashboard = () => {
   const { data: messages = [] } = useQuery({
     queryKey: ["messages", activeChannel],
     enabled: !!activeChannel,
-    refetchInterval: 3000,
     queryFn: async () => {
       const { data } = await supabase
         .from("messages")
@@ -83,6 +82,28 @@ const AppDashboard = () => {
       return data || [];
     },
   });
+
+  // Real-time message subscription
+  useEffect(() => {
+    if (!activeChannel) return;
+    const channel = supabase
+      .channel(`messages-${activeChannel}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannel}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["messages", activeChannel] });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [activeChannel, queryClient]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const { data: members = [] } = useQuery({
     queryKey: ["members", activeServer],
@@ -324,6 +345,7 @@ const AppDashboard = () => {
                   </div>
                 </motion.div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
 
             {activeChannel && (
