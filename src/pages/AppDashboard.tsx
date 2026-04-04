@@ -18,7 +18,7 @@ const AppDashboard = () => {
   const [activeServer, setActiveServer] = useState<string | null>(null);
   const [activeChannel, setActiveChannel] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState("");
-
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
