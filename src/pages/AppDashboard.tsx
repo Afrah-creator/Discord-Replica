@@ -345,6 +345,7 @@ const AppDashboard = () => {
                   </div>
                 </motion.div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
 
             {activeChannel && (
