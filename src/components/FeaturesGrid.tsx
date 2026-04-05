@@ -4,6 +4,8 @@ import {
   MessageSquare, Users, Gamepad2, Video, Shield, Zap,
   Bot, Sticker, Globe, Mic, Hash, Bell
 } from "lucide-react";
+import sectionMultiplatform from "@/assets/section-multiplatform.jpg";
+import heroCommunity from "@/assets/hero-community.jpg";
 
 const features = [
   { icon: MessageSquare, title: "Text Channels", desc: "Organized conversations by topic. Pin messages, share files, and search history." },
@@ -24,6 +26,11 @@ const FeaturesGrid = () => {
   return (
     <section id="features" className="py-24 bg-card">
       <div className="container mx-auto px-6">
+        {/* Hero image for this section */}
+        <motion.div className="max-w-5xl mx-auto mb-14" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <img src={heroCommunity} alt="N8 Community" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
+        </motion.div>
+
         <motion.div className="text-center mb-14" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">PACKED WITH FEATURES</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -49,6 +56,12 @@ const FeaturesGrid = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Multiplatform image */}
+        <motion.div className="max-w-4xl mx-auto mt-16" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <img src={sectionMultiplatform} alt="N8 on desktop and mobile" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
+          <p className="text-center text-muted-foreground mt-4 text-sm">Available on desktop, mobile, and your browser — your chats sync everywhere.</p>
+        </motion.div>
 
         <motion.div className="text-center mt-12" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           <Link
