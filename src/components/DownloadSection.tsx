@@ -15,7 +15,7 @@ const actions = [
 
 const DownloadSection = () => {
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section id="download" className="relative py-24 overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0">
         <img src={ctaBanner} alt="" className="w-full h-full object-cover opacity-20" />
