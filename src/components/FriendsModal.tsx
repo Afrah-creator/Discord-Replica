@@ -4,6 +4,7 @@ import { X, UserPlus, Search, Check, XIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Friend, PendingFriendRequest, Profile } from "@/lib/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface FriendsModalProps {
@@ -27,9 +28,9 @@ const FriendsModal = ({ isOpen, onClose }: FriendsModalProps) => {
         .eq("status", "accepted")
         .or(`requester_id.eq.${user!.id},addressee_id.eq.${user!.id}`);
       if (error) throw error;
-      return (data || []).map((f: any) => {
+      return (data || []).map((f: { requester_id: string; addressee_id: string; id: string; addressee: Profile }) => {
         const friend = f.requester_id === user!.id ? f.addressee : f.requester;
-        return { ...friend, friendshipId: f.id };
+        return { ...friend, friendshipId: f.id } as Friend;
       });
     },
   });
@@ -72,7 +73,7 @@ const FriendsModal = ({ isOpen, onClose }: FriendsModalProps) => {
       setSearchUsername("");
       queryClient.invalidateQueries({ queryKey: ["pending-friends"] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const respondRequest = useMutation({
@@ -93,7 +94,7 @@ const FriendsModal = ({ isOpen, onClose }: FriendsModalProps) => {
       queryClient.invalidateQueries({ queryKey: ["friends"] });
       queryClient.invalidateQueries({ queryKey: ["pending-friends"] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   return (
@@ -155,7 +156,7 @@ const FriendsModal = ({ isOpen, onClose }: FriendsModalProps) => {
                   {friends.length === 0 ? (
                     <p className="text-muted-foreground text-sm text-center py-8">No friends yet. Add some!</p>
                   ) : (
-                    friends.map((f: any) => (
+                    friends.map((f: Friend) => (
                       <div key={f.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50">
                         <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground">
                           {(f.display_name || f.username)?.[0]?.toUpperCase()}
@@ -175,7 +176,7 @@ const FriendsModal = ({ isOpen, onClose }: FriendsModalProps) => {
                   {pendingRequests.length === 0 ? (
                     <p className="text-muted-foreground text-sm text-center py-8">No pending requests</p>
                   ) : (
-                    pendingRequests.map((r: any) => (
+                    pendingRequests.map((r: PendingFriendRequest) => (
                       <div key={r.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50">
                         <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground">
                           {(r.requester?.display_name || r.requester?.username)?.[0]?.toUpperCase()}

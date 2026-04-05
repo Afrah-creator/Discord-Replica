@@ -75,4 +75,8 @@ export class UserDirectory {
   get totalUsers(): number {
     return this.usersById.size;
   }
+
+  getAllUsers(): UserRecord[] {
+    return Array.from(this.usersById.values());
+  }
 }

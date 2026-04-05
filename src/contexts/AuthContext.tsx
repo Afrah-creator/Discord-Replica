@@ -13,47 +13,101 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const withTimeout = async <T,>(promise: Promise<T>, ms: number, message: string) => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    let ignore = false;
+
+    const init = async () => {
+      const { data, error } = await withTimeout(
+        supabase.auth.getSession(),
+        8000,
+        "Auth session check timed out. Please check your network and Supabase config."
+      );
+      if (ignore) return;
+      if (error) {
+        console.error("Failed to get session:", error.message);
+      }
+      setSession(data.session ?? null);
+      setUser(data.session?.user ?? null);
+      setLoading(false);
+    };
+
+    init();
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      ignore = true;
+      subscription.subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, username: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { username, display_name: username },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    if (error) throw error;
+    setLoading(true);
+    try {
+      const { error } = await withTimeout(
+        supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { username },
+        },
+      }),
+        12000,
+        "Sign up timed out. Please try again."
+      );
+      if (error) throw new Error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    setLoading(true);
+    try {
+      const { error } = await withTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+        12000,
+        "Sign in timed out. Please check your network and try again."
+      );
+      if (error) throw new Error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    setLoading(true);
+    try {
+      const { error } = await withTimeout(
+        supabase.auth.signOut(),
+        8000,
+        "Sign out timed out. Please try again."
+      );
+      if (error) throw new Error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,6 +119,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  if (!context) {
+    return {
+      session: null,
+      user: null,
+      loading: false,
+      signUp: async () => {},
+      signIn: async () => {},
+      signOut: async () => {},
+    };
+  }
   return context;
 };

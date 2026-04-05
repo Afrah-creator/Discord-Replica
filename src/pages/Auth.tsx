@@ -1,42 +1,98 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "/logo.png";
 
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const registerSchema = loginSchema.extend({
+  username: z
+    .string()
+    .min(2, "Username must be at least 2 characters")
+    .max(20, "Username too long")
+    .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores"),
+});
+
+type AuthFormData = z.infer<typeof registerSchema> | z.infer<typeof loginSchema>;
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    setError,
+  } = useForm<AuthFormData>({
+    resolver: zodResolver(isLogin ? loginSchema : registerSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      username: "",
+    },
+  });
+
+  const onSubmit = async (data: AuthFormData) => {
     try {
       if (isLogin) {
-        await signIn(email, password);
-        toast.success("Welcome back!");
-        navigate("/app");
-      } else {
-        if (!username.trim()) {
-          toast.error("Username is required");
-          setLoading(false);
+        await signIn(data.email, data.password);
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          toast.error("Login not completed. Please check your email verification or credentials.");
           return;
         }
-        await signUp(email, password, username.trim());
-        toast.success("Account created! Check your email to confirm, or log in.");
+        toast.success("Welcome back!");
+        const pendingInvite = localStorage.getItem("pending_invite_code");
+        if (pendingInvite) {
+          localStorage.removeItem("pending_invite_code");
+          navigate(`/invite/${pendingInvite}`);
+          return;
+        }
+        navigate("/app");
+      } else {
+        await signUp(data.email, data.password, data.username!);
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          toast.info("Account created. Please check your email to confirm before logging in.");
+          return;
+        }
+        toast.success("Account created!");
+        const pendingInvite = localStorage.getItem("pending_invite_code");
+        if (pendingInvite) {
+          localStorage.removeItem("pending_invite_code");
+          navigate(`/invite/${pendingInvite}`);
+          return;
+        }
         navigate("/app");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      toast.error(message);
+      
+      if (message.includes("email")) {
+        setError("email", { message });
+      } else if (message.includes("password")) {
+        setError("password", { message });
+      }
     }
+  };
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    reset();
   };
 
   return (
@@ -58,53 +114,70 @@ const Auth = () => {
           {isLogin ? "We're so excited to see you again!" : "Join N8 and start chatting with friends"}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {!isLogin && (
             <div>
               <label className="text-xs font-bold uppercase text-secondary-foreground mb-1 block">Username</label>
               <input
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                {...register("username")}
                 className="w-full px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                required
+                placeholder="cooluser123"
               />
+              {errors.username && (
+                <p className="text-destructive text-xs mt-1">{errors.username.message}</p>
+              )}
             </div>
           )}
+          
           <div>
             <label className="text-xs font-bold uppercase text-secondary-foreground mb-1 block">Email</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               className="w-full px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              required
+              placeholder="you@example.com"
             />
+            {errors.email && (
+              <p className="text-destructive text-xs mt-1">{errors.email.message}</p>
+            )}
           </div>
+          
           <div>
             <label className="text-xs font-bold uppercase text-secondary-foreground mb-1 block">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                {...register("password")}
+                className="w-full px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary pr-10"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-sm"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-destructive text-xs mt-1">{errors.password.message}</p>
+            )}
           </div>
+          
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full py-2.5 rounded-md gradient-blurple text-primary-foreground font-medium text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
           >
-            {loading ? "Loading..." : isLogin ? "Log In" : "Register"}
+            {isSubmitting ? "Loading..." : isLogin ? "Log In" : "Register"}
           </button>
         </form>
 
         <p className="mt-4 text-sm text-muted-foreground">
           {isLogin ? "Need an account? " : "Already have an account? "}
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={toggleMode}
             className="text-blurple hover:underline font-medium"
           >
             {isLogin ? "Register" : "Log In"}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Gamepad2, BookOpen, Users, Sparkles, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,9 @@ import { toast } from "sonner";
 interface ServerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onServerCreated?: () => void;
+  onServerCreated?: (server?: { id: string; name: string; invite_code?: string | null }) => void;
+  initialStep?: Step;
+  initialInviteCode?: string;
 }
 
 const templates = [
@@ -20,13 +22,23 @@ const templates = [
 
 type Step = "choose" | "template" | "customize" | "join";
 
-const ServerModal = ({ isOpen, onClose, onServerCreated }: ServerModalProps) => {
+const ServerModal = ({ isOpen, onClose, onServerCreated, initialStep, initialInviteCode }: ServerModalProps) => {
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("choose");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [serverName, setServerName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialStep) {
+      setStep(initialStep);
+    }
+    if (initialInviteCode) {
+      setInviteCode(initialInviteCode);
+    }
+  }, [isOpen, initialStep, initialInviteCode]);
 
   const handleTemplateSelect = (id: string) => {
     setSelectedTemplate(id);
@@ -37,16 +49,20 @@ const ServerModal = ({ isOpen, onClose, onServerCreated }: ServerModalProps) => 
     if (!user || !serverName.trim()) return;
     setLoading(true);
     try {
-      const { error } = await supabase.from("servers").insert({
-        name: serverName.trim(),
-        template: selectedTemplate || "own",
-        owner_id: user.id,
-      });
+      const { data, error } = await supabase
+        .from("servers")
+        .insert({
+          name: serverName.trim(),
+          template: selectedTemplate || "own",
+          owner_id: user.id,
+        })
+        .select("id, name, invite_code")
+        .single();
       if (error) throw error;
       toast.success(`Server "${serverName}" created!`);
-      onServerCreated?.();
+      onServerCreated?.(data || undefined);
       handleClose();
-    } catch (err: any) {
+    } catch (err: Error) {
       toast.error(err.message || "Failed to create server");
     } finally {
       setLoading(false);
@@ -59,7 +75,7 @@ const ServerModal = ({ isOpen, onClose, onServerCreated }: ServerModalProps) => 
     try {
       const { data: server, error: findErr } = await supabase
         .from("servers")
-        .select("id, name")
+        .select("id, name, invite_code")
         .eq("invite_code", inviteCode.trim())
         .maybeSingle();
       if (findErr) throw findErr;
@@ -81,9 +97,9 @@ const ServerModal = ({ isOpen, onClose, onServerCreated }: ServerModalProps) => 
       } else {
         toast.success(`Joined "${server.name}"!`);
       }
-      onServerCreated?.();
+      onServerCreated?.(server || undefined);
       handleClose();
-    } catch (err: any) {
+    } catch (err: Error) {
       toast.error(err.message || "Failed to join server");
     } finally {
       setLoading(false);
@@ -237,3 +253,4 @@ const ServerModal = ({ isOpen, onClose, onServerCreated }: ServerModalProps) => 
 };
 
 export default ServerModal;
+

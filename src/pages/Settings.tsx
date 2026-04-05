@@ -43,7 +43,7 @@ const Settings = () => {
       toast.success("Profile updated!");
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   if (!user) { navigate("/auth"); return null; }

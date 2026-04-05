@@ -1,34 +1,23 @@
-import { motion } from "framer-motion";
+export default function StatsSection() {
+  const stats = [
+    { value: "150M+", label: "Monthly Active Users" },
+    { value: "19M+", label: "Active Servers Weekly" },
+    { value: "4B+", label: "Daily Messages" },
+    { value: "1.3B+", label: "Voice Minutes Daily" },
+  ];
 
-const stats = [
-  { value: "150M+", label: "Monthly Active Users" },
-  { value: "19M+", label: "Active Servers Weekly" },
-  { value: "4B+", label: "Daily Messages" },
-  { value: "1.3B+", label: "Voice Minutes Daily" },
-];
-
-const StatsSection = () => {
   return (
-    <section id="stats" className="py-16 bg-card border-y border-border">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <section style={{ padding: '48px 0', background: '#2b2c30', borderTop: '1px solid #3f4045', borderBottom: '1px solid #3f4045' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
           {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              className="text-center"
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <p className="text-3xl md:text-5xl font-black text-gradient mb-2">{stat.value}</p>
-              <p className="text-muted-foreground text-sm">{stat.label}</p>
-            </motion.div>
+            <div key={stat.label} style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 900, background: 'linear-gradient(135deg, #5865F2, #9b59b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 8 }}>{stat.value}</p>
+              <p style={{ color: '#949ba4', fontSize: 14 }}>{stat.label}</p>
+            </div>
           ))}
         </div>
       </div>
     </section>
   );
-};
-
-export default StatsSection;
+}

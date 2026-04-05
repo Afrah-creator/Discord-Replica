@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Hash, Volume2, Settings, Smile, Send, Mic, Headphones, Users, Search, Bell, UserPlus, LogOut, Copy, Home } from "lucide-react";
+import { Plus, Hash, Volume2, Settings, Send, Mic, Headphones, Users, UserPlus, LogOut, Copy, Home, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Message, ServerMember } from "@/lib/types";
 import ServerModal from "@/components/ServerModal";
 import FriendsModal from "@/components/FriendsModal";
+import InviteModal from "@/components/InviteModal";
+import LiveKitCallModal from "@/components/LiveKitCallModal";
+import InviteManagerPanel from "@/components/InviteManagerPanel";
 
 const AppDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -15,9 +19,13 @@ const AppDashboard = () => {
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [friendsOpen, setFriendsOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [callOpen, setCallOpen] = useState(false);
   const [activeServer, setActiveServer] = useState<string | null>(null);
   const [activeChannel, setActiveChannel] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState("");
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
+  const [callRoom, setCallRoom] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -117,6 +125,39 @@ const AppDashboard = () => {
     },
   });
 
+  // Real-time presence per server
+  useEffect(() => {
+    if (!activeServer || !user) return;
+
+    const channel = supabase.channel(`presence-${activeServer}`, {
+      config: { presence: { key: user.id } },
+    });
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+        const online = new Set<string>();
+        Object.values(state).forEach((presences: any) => {
+          presences.forEach((p: any) => {
+            if (p?.user_id) online.add(p.user_id);
+          });
+        });
+        setOnlineUserIds(online);
+      })
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({
+            user_id: user.id,
+            name: profile?.display_name || profile?.username || "User",
+          });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeServer, user, profile?.display_name, profile?.username]);
+
   const sendMessage = useMutation({
     mutationFn: async (content: string) => {
       const { error } = await supabase.from("messages").insert({
@@ -130,7 +171,7 @@ const AppDashboard = () => {
       setMessageInput("");
       queryClient.invalidateQueries({ queryKey: ["messages", activeChannel] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const handleSend = () => {
@@ -141,7 +182,13 @@ const AppDashboard = () => {
   const activeServerData = servers.find((s) => s.id === activeServer);
   const activeChannelData = channels.find((c) => c.id === activeChannel);
 
-  if (authLoading || !user) return <div className="flex h-screen items-center justify-center bg-background text-foreground">Loading...</div>;
+  if (authLoading) {
+    return <div className="flex h-screen items-center justify-center bg-background text-foreground">Loading...</div>;
+  }
+  if (!user) {
+    navigate("/auth");
+    return null;
+  }
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -202,16 +249,24 @@ const AppDashboard = () => {
           {activeServerData?.invite_code && (
             <button
               onClick={() => {
-                navigator.clipboard.writeText(activeServerData.invite_code!);
-                toast.success("Invite code copied!");
+                setInviteOpen(true);
               }}
               className="text-muted-foreground hover:text-foreground transition-colors"
-              title="Copy invite code"
+              title="Invite"
             >
               <Copy size={14} />
             </button>
           )}
         </div>
+        {activeServerData?.invite_code && (
+          <InviteManagerPanel
+            serverId={activeServerData.id}
+            serverName={activeServerData.name}
+            inviteCode={activeServerData.invite_code}
+            onInviteOpen={() => setInviteOpen(true)}
+            onInviteUpdated={() => queryClient.invalidateQueries({ queryKey: ["servers"] })}
+          />
+        )}
 
         <div className="flex-1 overflow-y-auto px-2 py-3">
           {channels.filter((c) => c.type === "text").length > 0 && (
@@ -235,9 +290,21 @@ const AppDashboard = () => {
             <div>
               <h3 className="px-2 mb-1 text-xs font-bold uppercase text-muted-foreground tracking-wide">Voice Channels</h3>
               {channels.filter((c) => c.type === "voice").map((ch) => (
-                <button key={ch.id} className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                  <Volume2 size={16} className="flex-shrink-0 opacity-60" />
-                  <span className="truncate">{ch.name}</span>
+                <button
+                  key={ch.id}
+                  onClick={() => {
+                    if (!activeServerData) return;
+                    const room = `server-${activeServerData.id}-voice-${ch.id}`;
+                    setCallRoom(room);
+                    setCallOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Volume2 size={16} className="flex-shrink-0 opacity-60" />
+                    <span className="truncate">{ch.name}</span>
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">Join</span>
                 </button>
               ))}
             </div>
@@ -274,40 +341,61 @@ const AppDashboard = () => {
       {/* Main chat */}
       <div className="flex-1 flex flex-col min-w-0">
         {!activeServer ? (
-          /* Home / Welcome view */
           <>
             <div className="h-12 px-4 flex items-center gap-3 border-b border-border shadow-sm flex-shrink-0">
               <Home size={20} className="text-muted-foreground" />
-              <span className="font-bold text-foreground">Home</span>
+              <span className="font-bold text-foreground">Your Servers</span>
             </div>
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center max-w-md px-6">
-                <div className="w-20 h-20 rounded-full gradient-blurple flex items-center justify-center mx-auto mb-6">
-                  <Users size={36} className="text-primary-foreground" />
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">All Servers</h2>
+                  <p className="text-sm text-muted-foreground">Real servers stored in Supabase</p>
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-3">Welcome to N8!</h2>
-                <p className="text-muted-foreground mb-6">Create a server, join one with an invite code, or add friends to get started.</p>
-                <div className="flex flex-wrap justify-center gap-3">
+                <div className="flex gap-2">
                   <button
                     onClick={() => setModalOpen(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full gradient-blurple text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+                    className="px-4 py-2 rounded-full gradient-blurple text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
                   >
-                    <Plus size={16} /> Create Server
+                    <Plus size={14} className="inline-block mr-1" /> Create
                   </button>
                   <button
                     onClick={() => setFriendsOpen(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
+                    className="px-4 py-2 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
                   >
-                    <UserPlus size={16} /> Add Friends
-                  </button>
-                  <button
-                    onClick={() => navigate("/settings")}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
-                  >
-                    <Settings size={16} /> Settings
+                    <UserPlus size={14} className="inline-block mr-1" /> Friends
                   </button>
                 </div>
               </div>
+
+              {servers.length === 0 && (
+                <div className="text-center text-muted-foreground text-sm py-12">
+                  No servers yet. Create one to get started.
+                </div>
+              )}
+
+              {servers.length > 0 && (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {servers.map((server) => (
+                    <button
+                      key={server.id}
+                      onClick={() => {
+                        setActiveServer(server.id);
+                        setActiveChannel(null);
+                      }}
+                      className="text-left p-4 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-lg font-semibold text-foreground">{server.name}</div>
+                        <div className="text-xs text-muted-foreground">Open</div>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Invite: {server.invite_code || "No code"}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -316,6 +404,19 @@ const AppDashboard = () => {
             <div className="h-12 px-4 flex items-center gap-3 border-b border-border shadow-sm flex-shrink-0">
               <Hash size={20} className="text-muted-foreground" />
               <span className="font-bold text-foreground">{activeChannelData?.name || "general"}</span>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (!activeServerData) return;
+                    const room = `server-${activeServerData.id}-channel-${activeChannelData?.id || "general"}`;
+                    setCallRoom(room);
+                    setCallOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-md bg-secondary text-foreground text-xs font-medium hover:bg-secondary/80"
+                >
+                  <Phone size={14} className="inline-block mr-1" /> Start Call
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
@@ -325,7 +426,7 @@ const AppDashboard = () => {
                   <p>This is the beginning of this channel. Say hi! 👋</p>
                 </div>
               )}
-              {messages.map((msg: any, i: number) => (
+              {messages.map((msg: Message, i: number) => (
                 <motion.div
                   key={msg.id}
                   className="flex gap-3 group hover:bg-secondary/30 -mx-4 px-4 py-1 rounded"
@@ -375,17 +476,17 @@ const AppDashboard = () => {
             Members — {members.length}
           </h3>
           <div className="space-y-1">
-            {members.map((m: any) => (
+            {members.map((m: ServerMember) => (
               <div key={m.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-secondary/50 transition-colors cursor-pointer">
                 <div className="relative">
                   <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
                     {(m.profile?.display_name || m.profile?.username || "U")[0].toUpperCase()}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-n8-green border-2 border-card" />
+                  <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${onlineUserIds.has(m.user_id) ? "bg-n8-green" : "bg-muted"}`} />
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">{m.profile?.display_name || m.profile?.username}</span>
-                  {m.role === "owner" && <span className="text-[10px] text-n8-yellow ml-1">👑</span>}
+                  {m.role === "owner" && <span className="text-[10px] text-n8-yellow ml-1">OWNER</span>}
                 </div>
               </div>
             ))}
@@ -399,6 +500,27 @@ const AppDashboard = () => {
         onServerCreated={() => queryClient.invalidateQueries({ queryKey: ["servers"] })}
       />
       <FriendsModal isOpen={friendsOpen} onClose={() => setFriendsOpen(false)} />
+      {activeServerData && (
+        <InviteModal
+          isOpen={inviteOpen}
+          onClose={() => setInviteOpen(false)}
+          serverId={activeServerData.id}
+          serverName={activeServerData.name}
+          inviteCode={activeServerData.invite_code}
+        />
+      )}
+      {activeServerData && user && callRoom && (
+        <LiveKitCallModal
+          isOpen={callOpen}
+          onClose={() => {
+            setCallOpen(false);
+            setCallRoom(null);
+          }}
+          room={callRoom}
+          identity={user.id}
+          name={profile?.display_name || profile?.username || "User"}
+        />
+      )}
     </div>
   );
 };

@@ -2,6 +2,12 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #1a1b1e;
+}
+
+body {
+  background-color: #1a1b1e;
+  min-height: 100vh;
 }
 
 @tailwind base;
@@ -66,6 +72,10 @@ html {
   body {
     @apply bg-background text-foreground;
     font-family: 'DM Sans', sans-serif;
+    background-color: hsl(228 6% 15%);
+  }
+  html {
+    background-color: hsl(228 6% 15%);
   }
 }
 
