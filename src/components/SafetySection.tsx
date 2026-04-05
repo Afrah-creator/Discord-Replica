@@ -2,14 +2,19 @@ import { motion } from "framer-motion";
 import { Shield, Lock, Eye, UserCheck, AlertTriangle, Ban } from "lucide-react";
 import { Link } from "react-router-dom";
 import safetyImg from "@/assets/section-safety-dashboard.jpg";
+import safetyAutomod from "@/assets/safety-automod.jpg";
+import safetyPrivacy from "@/assets/safety-privacy.jpg";
+import safetyVerification from "@/assets/safety-verification.jpg";
+import safetyReport from "@/assets/safety-report.jpg";
+import safetyBans from "@/assets/safety-bans.jpg";
 
 const safetyFeatures = [
-  { icon: Shield, title: "Advanced Moderation", desc: "AutoMod filters harmful content automatically. Set custom keyword filters and spam protection." },
-  { icon: Lock, title: "Two-Factor Authentication", desc: "Keep your account extra secure with 2FA. Require it for your entire server's moderators." },
-  { icon: Eye, title: "Privacy Controls", desc: "Control who can DM you, who can add you as a friend, and manage your data privacy settings." },
-  { icon: UserCheck, title: "Verification Levels", desc: "Set requirements for new members — verified email, phone, or timed waiting periods." },
-  { icon: AlertTriangle, title: "Report & Block", desc: "Report harmful behaviour directly to our Trust & Safety team. Block anyone with a single click." },
-  { icon: Ban, title: "Server Bans & Timeouts", desc: "Temporarily timeout or permanently ban disruptive members. Keep your community safe and fun." },
+  { icon: Shield, title: "Advanced Moderation", desc: "AutoMod filters harmful content automatically. Set custom keyword filters and spam protection.", image: safetyAutomod },
+  { icon: Lock, title: "Two-Factor Authentication", desc: "Keep your account extra secure with 2FA. Require it for your entire server's moderators.", image: null },
+  { icon: Eye, title: "Privacy Controls", desc: "Control who can DM you, who can add you as a friend, and manage your data privacy settings.", image: safetyPrivacy },
+  { icon: UserCheck, title: "Verification Levels", desc: "Set requirements for new members — verified email, phone, or timed waiting periods.", image: safetyVerification },
+  { icon: AlertTriangle, title: "Report & Block", desc: "Report harmful behaviour directly to our Trust & Safety team. Block anyone with a single click.", image: safetyReport },
+  { icon: Ban, title: "Server Bans & Timeouts", desc: "Temporarily timeout or permanently ban disruptive members. Keep your community safe and fun.", image: safetyBans },
 ];
 
 const SafetySection = () => {
@@ -27,24 +32,38 @@ const SafetySection = () => {
           </p>
         </motion.div>
 
-        {/* Large safety image */}
+        {/* Large safety dashboard image */}
         <motion.div className="max-w-4xl mx-auto mb-14" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <img src={safetyImg} alt="N8 Safety & Moderation Dashboard" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        {/* Alternating feature + image rows */}
+        <div className="space-y-16 max-w-5xl mx-auto mb-14">
           {safetyFeatures.map((feature, i) => (
             <motion.div
               key={feature.title}
-              className="p-6 rounded-xl bg-background border border-border hover:border-n8-green/30 transition-colors"
-              initial={{ opacity: 0, y: 20 }}
+              className={`grid ${feature.image ? "lg:grid-cols-2" : "lg:grid-cols-1 max-w-2xl mx-auto"} gap-8 items-center`}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
+              transition={{ delay: 0.1 }}
             >
-              <feature.icon className="text-n8-green mb-4" size={24} />
-              <h3 className="text-foreground font-bold mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
+              <div className={i % 2 !== 0 && feature.image ? "lg:order-2" : ""}>
+                <div className="flex items-start gap-4 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-n8-green/20 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="text-n8-green" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-foreground font-bold text-xl mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
+                  </div>
+                </div>
+              </div>
+              {feature.image && (
+                <div className={i % 2 !== 0 ? "lg:order-1" : ""}>
+                  <img src={feature.image} alt={feature.title} className="w-full rounded-xl shadow-xl" loading="lazy" width={1280} height={800} />
+                </div>
+              )}
             </motion.div>
           ))}
         </div>

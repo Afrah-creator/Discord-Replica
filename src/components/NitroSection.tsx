@@ -1,8 +1,13 @@
 import { motion } from "framer-motion";
-import { Sparkles, Upload, SmilePlus, Palette, Crown, Rocket } from "lucide-react";
+import { Sparkles, Upload, SmilePlus, Palette, Crown, Rocket, Zap, Video } from "lucide-react";
 import { Link } from "react-router-dom";
 import sectionNitro from "@/assets/section-nitro.jpg";
 import nitroPromo from "@/assets/section-nitro-promo.jpg";
+import nitroAvatar from "@/assets/nitro-avatar-profile.jpg";
+import nitroUpload from "@/assets/nitro-file-upload.jpg";
+import nitroStreaming from "@/assets/nitro-hd-streaming.jpg";
+import nitroEmoji from "@/assets/nitro-custom-emoji.jpg";
+import nitroBoost from "@/assets/nitro-server-boost.jpg";
 
 const perks = [
   { icon: SmilePlus, label: "Custom Emoji Anywhere" },
@@ -11,6 +16,16 @@ const perks = [
   { icon: Crown, label: "Server Boosts" },
   { icon: Rocket, label: "HD Video Streaming" },
   { icon: Sparkles, label: "Animated Avatars" },
+  { icon: Zap, label: "Super Reactions" },
+  { icon: Video, label: "Custom Video Backgrounds" },
+];
+
+const showcaseImages = [
+  { src: nitroAvatar, alt: "N8 Nitro Premium Profile & Badges", caption: "Stand out with animated avatars, profile banners, and exclusive badges" },
+  { src: nitroEmoji, alt: "N8 Nitro Custom Emoji", caption: "Use custom and animated emoji in every server" },
+  { src: nitroUpload, alt: "N8 Nitro File Upload", caption: "Upload files up to 500MB — share videos, images, and more" },
+  { src: nitroStreaming, alt: "N8 Nitro HD Streaming", caption: "Stream in HD quality up to 4K at 60fps" },
+  { src: nitroBoost, alt: "N8 Nitro Server Boost", caption: "Boost your favourite servers to unlock perks for everyone" },
 ];
 
 const NitroSection = () => {
@@ -40,7 +55,8 @@ const NitroSection = () => {
           <img src={nitroPromo} alt="N8 Nitro Premium Features" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-12">
+        {/* Perks grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16">
           {perks.map((perk, i) => (
             <motion.div
               key={perk.label}
@@ -52,6 +68,30 @@ const NitroSection = () => {
             >
               <perk.icon className="mx-auto mb-3 text-n8-yellow" size={28} />
               <p className="text-foreground text-sm font-semibold">{perk.label}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Showcase image gallery */}
+        <div className="space-y-12 max-w-5xl mx-auto mb-14">
+          {showcaseImages.map((img, i) => (
+            <motion.div
+              key={img.alt}
+              className={`grid lg:grid-cols-2 gap-8 items-center ${i % 2 !== 0 ? "direction-rtl" : ""}`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className={i % 2 !== 0 ? "lg:order-2" : ""}>
+                <img src={img.src} alt={img.alt} className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
+              </div>
+              <div className={`${i % 2 !== 0 ? "lg:order-1" : ""} flex items-center`}>
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-black text-foreground mb-3">{img.alt.replace("N8 Nitro ", "").toUpperCase()}</h3>
+                  <p className="text-muted-foreground text-lg leading-relaxed">{img.caption}</p>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>

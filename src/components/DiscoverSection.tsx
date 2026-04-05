@@ -2,6 +2,10 @@ import { motion } from "framer-motion";
 import { Compass, Users, Gamepad2, Music, GraduationCap, Film, Palette, Code } from "lucide-react";
 import { Link } from "react-router-dom";
 import discoverImg from "@/assets/section-discover-servers.jpg";
+import discoverBrowse from "@/assets/discover-browse.jpg";
+import discoverGaming from "@/assets/discover-gaming.jpg";
+import discoverMusic from "@/assets/discover-music.jpg";
+import discoverEducation from "@/assets/discover-education.jpg";
 
 const categories = [
   { icon: Gamepad2, name: "Gaming", members: "3.2M+", color: "text-n8-green" },
@@ -12,6 +16,12 @@ const categories = [
   { icon: Code, name: "Science & Tech", members: "1.5M+", color: "text-n8-green" },
   { icon: Users, name: "Social", members: "4.3M+", color: "text-n8-yellow" },
   { icon: Compass, name: "Explore More", members: "∞", color: "text-primary" },
+];
+
+const communityShowcase = [
+  { src: discoverGaming, alt: "Gaming Communities on N8", title: "GAMING", desc: "Find your squad. Join gaming communities for every genre — FPS, RPG, MOBA, and more." },
+  { src: discoverMusic, alt: "Music Communities on N8", title: "MUSIC", desc: "Share playlists, discover new artists, and listen together in voice channels." },
+  { src: discoverEducation, alt: "Education Communities on N8", title: "EDUCATION", desc: "Study groups, homework help, and course communities for every subject." },
 ];
 
 const DiscoverSection = () => {
@@ -37,6 +47,37 @@ const DiscoverSection = () => {
           </motion.div>
         </div>
 
+        {/* Server discovery browse image */}
+        <motion.div className="max-w-5xl mx-auto mb-16" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <img src={discoverBrowse} alt="Browse N8 Servers" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
+          <p className="text-center text-muted-foreground mt-4 text-sm">Browse thousands of active communities across every category</p>
+        </motion.div>
+
+        {/* Community showcase - alternating */}
+        <div className="space-y-16 max-w-5xl mx-auto mb-16">
+          {communityShowcase.map((item, i) => (
+            <motion.div
+              key={item.title}
+              className="grid lg:grid-cols-2 gap-8 items-center"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className={i % 2 !== 0 ? "lg:order-2" : ""}>
+                <img src={item.src} alt={item.alt} className="w-full rounded-xl shadow-xl" loading="lazy" width={1280} height={800} />
+              </div>
+              <div className={i % 2 !== 0 ? "lg:order-1" : ""}>
+                <h3 className="text-2xl md:text-3xl font-black text-foreground mb-3">{item.title}</h3>
+                <p className="text-muted-foreground text-lg leading-relaxed">{item.desc}</p>
+                <Link to="/app" className="inline-flex items-center gap-2 mt-4 text-primary font-semibold hover:underline">
+                  Explore {item.title.toLowerCase()} servers →
+                </Link>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Category cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
           {categories.map((cat, i) => (
             <motion.div key={cat.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
