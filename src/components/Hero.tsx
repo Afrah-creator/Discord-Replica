@@ -11,11 +11,11 @@ import ServerModal from "@/components/ServerModal";
 import FriendsModal from "@/components/FriendsModal";
 
 const navLinks = [
+  { label: "Download", href: "/#download" },
+  { label: "Nitro", href: "/#nitro" },
   { label: "Discover", href: "/#discover" },
   { label: "Safety", href: "/#safety" },
-  { label: "Nitro", href: "/#nitro" },
-  { label: "Features", href: "/#features" },
-  { label: "Support", href: "/#safety" },
+  { label: "Support", href: "/#features" },
 ];
 
 const Hero = () => {
