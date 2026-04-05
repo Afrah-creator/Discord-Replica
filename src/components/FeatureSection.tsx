@@ -6,12 +6,19 @@ import sectionCommunity from "@/assets/section-community.jpg";
 import sectionVoice from "@/assets/section-voice.jpg";
 import sectionVoiceChat from "@/assets/section-voice-chat.jpg";
 import sectionTextChat from "@/assets/section-text-chat.jpg";
+import sectionGamingChat from "@/assets/section-gaming-chat.jpg";
+import sectionVideoCall from "@/assets/section-video-call.jpg";
+import sectionRoles from "@/assets/section-roles-permissions.jpg";
+import sectionEmoji from "@/assets/section-emoji-stickers.jpg";
+import sectionForums from "@/assets/section-forums.jpg";
+import sectionBots from "@/assets/section-bots-apps.jpg";
 
 interface AlternatingSection {
   title: string;
   description: string;
   image: string;
   secondaryImage?: string;
+  tertiaryImage?: string;
   reversed?: boolean;
   bgClass?: string;
   cta: { label: string; href: string };
@@ -23,6 +30,7 @@ const sections: AlternatingSection[] = [
     description: "N8 servers are organized into topic-based channels where you can collaborate, share, and just talk about your day without clogging up a group chat.",
     image: sectionInvite,
     secondaryImage: sectionTextChat,
+    tertiaryImage: sectionGamingChat,
     cta: { label: "Create Your Server", href: "/auth" },
   },
   {
@@ -30,6 +38,7 @@ const sections: AlternatingSection[] = [
     description: "Grab a seat in a voice channel when you're free. Friends in your server can see you're around and instantly pop in to talk without having to call.",
     image: sectionHangout,
     secondaryImage: sectionVoiceChat,
+    tertiaryImage: sectionVideoCall,
     reversed: true,
     bgClass: "bg-card",
     cta: { label: "Start Hanging Out", href: "/app" },
@@ -38,15 +47,33 @@ const sections: AlternatingSection[] = [
     title: "From few to a fandom",
     description: "Get any community running with moderation tools and custom member access. Give members special powers, set up private channels, and more.",
     image: sectionCommunity,
+    secondaryImage: sectionRoles,
     cta: { label: "Build Your Community", href: "/auth" },
   },
   {
     title: "RELIABLE TECH FOR STAYING CLOSE",
     description: "Low-latency voice and video feels like you're in the same room. Wave hello over video, watch friends stream their games, or gather up and have a drawing session with screen share.",
     image: sectionVoice,
+    secondaryImage: sectionVideoCall,
     reversed: true,
     bgClass: "bg-card",
     cta: { label: "Try It Free", href: "/app" },
+  },
+  {
+    title: "EXPRESS YOURSELF WITH CUSTOM EMOJI",
+    description: "Upload custom emoji and stickers for your server. Use animated emoji, search GIFs, and react to messages with your favourites.",
+    image: sectionEmoji,
+    secondaryImage: sectionGamingChat,
+    cta: { label: "See All Features", href: "/#features" },
+  },
+  {
+    title: "KEEP DISCUSSIONS ORGANIZED WITH FORUMS",
+    description: "Create forum channels for structured Q&A and discussions. Tag topics, sort by activity, and keep conversations easy to follow.",
+    image: sectionForums,
+    secondaryImage: sectionBots,
+    reversed: true,
+    bgClass: "bg-card",
+    cta: { label: "Explore Forums", href: "/app" },
   },
 ];
 
@@ -94,6 +121,20 @@ const FeatureSection = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.3 }}
+                  />
+                )}
+                {section.tertiaryImage && (
+                  <motion.img
+                    src={section.tertiaryImage}
+                    alt={`${section.title} extra`}
+                    className="w-full rounded-xl shadow-lg"
+                    loading="lazy"
+                    width={1280}
+                    height={800}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.45 }}
                   />
                 )}
               </motion.div>

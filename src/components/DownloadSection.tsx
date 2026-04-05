@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Plus, UserPlus, ArrowRight, Users, MessageSquare, Shield } from "lucide-react";
+import ctaBanner from "@/assets/cta-banner-bg.jpg";
+import heroCommunity from "@/assets/hero-community.jpg";
 
 const actions = [
   { icon: Plus, name: "Create a Server", desc: "Start your own community", href: "/auth", primary: true },
@@ -13,8 +15,19 @@ const actions = [
 
 const DownloadSection = () => {
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-6">
+    <section className="relative py-24 overflow-hidden">
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <img src={ctaBanner} alt="" className="w-full h-full object-cover opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/60" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-6">
+        {/* Community illustration */}
+        <motion.div className="max-w-3xl mx-auto mb-12" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
+          <img src={heroCommunity} alt="Join the N8 community" className="w-full rounded-xl shadow-2xl" loading="lazy" width={1280} height={800} />
+        </motion.div>
+
         <motion.div className="text-center mb-14" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">GET STARTED WITH N8</h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
