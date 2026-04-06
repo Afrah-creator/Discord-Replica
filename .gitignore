@@ -16,6 +16,12 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+.env.render
+server/.env
+
+# Bun lockfiles (force npm on Render)
+bun.lock
+bun.lockb
 server/.env
 
 # Editor directories and files
