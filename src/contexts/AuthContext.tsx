@@ -61,42 +61,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let ignore = false;
+    let initialHandled = false;
 
-    const init = async () => {
-      try {
-        const { data, error } = await withTimeout(
-          supabase.auth.getSession(),
-          12000,
-          "Auth session check timed out. Please check your network and Supabase config."
-        );
-        if (ignore) return;
-        if (error) {
-          console.error("Failed to get session:", error.message);
-        }
-        setSession(data.session ?? null);
-        setUser(data.session?.user ?? null);
-        await ensureProfileForUser(data.session?.user ?? null);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Auth session check failed.";
-        console.error(message);
-        setSession(null);
-        setUser(null);
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
-
-    init();
-
-    const { data: subscription } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (ignore) return;
       setSession(newSession);
       setUser(newSession?.user ?? null);
       await ensureProfileForUser(newSession?.user ?? null);
-      setLoading(false);
+      if (!initialHandled || event === "INITIAL_SESSION") {
+        initialHandled = true;
+        setLoading(false);
+      }
     });
+
+    const fallbackTimer = setTimeout(() => {
+      if (!ignore && !initialHandled) {
+        initialHandled = true;
+        setLoading(false);
+      }
+    }, 8000);
 
     return () => {
       ignore = true;
+      clearTimeout(fallbackTimer);
       subscription.subscription.unsubscribe();
     };
   }, []);
