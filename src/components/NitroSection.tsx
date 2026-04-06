@@ -100,9 +100,9 @@ const NitroSection = () => {
           <Link to="/auth" className="px-8 py-3 rounded-full gradient-blurple text-primary-foreground font-medium hover:opacity-90 transition-opacity">
             Subscribe to Nitro
           </Link>
-          <Link to="#features" className="px-8 py-3 rounded-full border border-border text-foreground font-medium hover:bg-secondary transition-colors">
+          <a href="#features" className="px-8 py-3 rounded-full border border-border text-foreground font-medium hover:bg-secondary transition-colors">
             Learn More
-          </Link>
+          </a>
         </motion.div>
       </div>
     </section>

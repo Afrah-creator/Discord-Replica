@@ -93,12 +93,21 @@ const FeatureSection = () => {
               >
                 <h2 className="text-3xl md:text-5xl font-black text-foreground leading-tight mb-6 uppercase">{section.title}</h2>
                 <p className="text-muted-foreground text-lg leading-relaxed max-w-lg mb-6">{section.description}</p>
-                <Link
-                  to={section.cta.href}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full gradient-blurple text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-                >
-                  {section.cta.label}
-                </Link>
+                {section.cta.href.startsWith("#") ? (
+                  <a
+                    href={section.cta.href}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full gradient-blurple text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+                  >
+                    {section.cta.label}
+                  </a>
+                ) : (
+                  <Link
+                    to={section.cta.href}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full gradient-blurple text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+                  >
+                    {section.cta.label}
+                  </Link>
+                )}
               </motion.div>
 
               <motion.div

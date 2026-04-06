@@ -65,6 +65,19 @@ const DownloadSection = () => {
                   <span className="font-bold text-sm">{a.name}</span>
                   <span className="text-xs opacity-80">{a.desc}</span>
                 </button>
+              ) : a.href.startsWith("#") ? (
+                <a
+                  href={a.href}
+                  className={`flex flex-col items-center gap-3 p-6 rounded-xl border transition-all hover:scale-[1.03] ${
+                    a.primary
+                      ? "gradient-blurple border-transparent glow-blurple text-primary-foreground"
+                      : "bg-card border-border hover:border-primary/30 text-foreground"
+                  }`}
+                >
+                  <a.icon size={32} />
+                  <span className="font-bold text-sm">{a.name}</span>
+                  <span className="text-xs opacity-80">{a.desc}</span>
+                </a>
               ) : (
                 <Link
                   to={a.href}
