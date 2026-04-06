@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { scrollToSection } from "@/lib/scroll";
 import heroCrystals from "@/assets/hero-crystals.jpg";
 import heroLeaningGirl from "@/assets/hero-leaning-girl.webp";
 import mascot from "@/assets/mascot.png";
@@ -32,10 +33,21 @@ export default function Hero() {
           <span style={{ fontSize: 24, fontWeight: 900, color: "#f2f3f5" }}>N8</span>
         </div>
         <div style={{ display: "flex", gap: 32 }}>
-          {["Download", "Nitro", "Discover", "Safety", "Support"].map((link) => (
-            <a key={link} href={`#${link.toLowerCase()}`} style={{ color: "#949ba4", textDecoration: "none", fontSize: 16 }}>
-              {link}
-            </a>
+          {[
+            { label: "Download", id: "download" },
+            { label: "Nitro", id: "nitro" },
+            { label: "Discover", id: "discover" },
+            { label: "Safety", id: "safety" },
+            { label: "Support", id: "safety" },
+          ].map((link) => (
+            <button
+              key={link.label}
+              type="button"
+              onClick={() => scrollToSection(link.id, navigate)}
+              style={{ color: "#949ba4", textDecoration: "none", fontSize: 16, background: "transparent", border: "none", cursor: "pointer" }}
+            >
+              {link.label}
+            </button>
           ))}
         </div>
         <button

@@ -5,6 +5,7 @@ import ctaBanner from "@/assets/cta-banner-bg.jpg";
 import heroCommunity from "@/assets/hero-community.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { scrollToSection } from "@/lib/scroll";
 
 const actions = [
   { icon: Plus, name: "Create a Server", desc: "Start your own community", href: "/auth", primary: true, requiresAuth: true },
@@ -66,8 +67,9 @@ const DownloadSection = () => {
                   <span className="text-xs opacity-80">{a.desc}</span>
                 </button>
               ) : a.href.startsWith("#") ? (
-                <a
-                  href={a.href}
+                <button
+                  type="button"
+                  onClick={() => scrollToSection(a.href.slice(1), navigate)}
                   className={`flex flex-col items-center gap-3 p-6 rounded-xl border transition-all hover:scale-[1.03] ${
                     a.primary
                       ? "gradient-blurple border-transparent glow-blurple text-primary-foreground"
@@ -77,7 +79,7 @@ const DownloadSection = () => {
                   <a.icon size={32} />
                   <span className="font-bold text-sm">{a.name}</span>
                   <span className="text-xs opacity-80">{a.desc}</span>
-                </a>
+                </button>
               ) : (
                 <Link
                   to={a.href}
