@@ -5,21 +5,21 @@ import ctaBg from "@/assets/cta-banner-bg.jpg";
 
 const footerLinks: Record<string, { label: string; href: string }[]> = {
   Product: [
-    { label: "Nitro", href: "/#nitro" },
-    { label: "Discover", href: "/#discover" },
-    { label: "Safety", href: "/#safety" },
-    { label: "Features", href: "/#features" },
+    { label: "Nitro", href: "#nitro" },
+    { label: "Discover", href: "#discover" },
+    { label: "Safety", href: "#safety" },
+    { label: "Features", href: "#features" },
     { label: "Activities", href: "/app" },
   ],
   Company: [
-    { label: "About", href: "/#stats" },
-    { label: "Jobs", href: "/#stats" },
+    { label: "About", href: "#stats" },
+    { label: "Jobs", href: "#stats" },
     { label: "Brand", href: "/" },
     { label: "Newsroom", href: "/" },
   ],
   Resources: [
-    { label: "Support", href: "/#safety" },
-    { label: "Safety Center", href: "/#safety" },
+    { label: "Support", href: "#safety" },
+    { label: "Safety Center", href: "#safety" },
     { label: "Blog", href: "/" },
     { label: "Feedback", href: "/" },
     { label: "Creators", href: "/" },
@@ -28,7 +28,7 @@ const footerLinks: Record<string, { label: string; href: string }[]> = {
     { label: "Terms", href: "/" },
     { label: "Privacy", href: "/" },
     { label: "Cookie Settings", href: "/" },
-    { label: "Guidelines", href: "/#safety" },
+    { label: "Guidelines", href: "#safety" },
     { label: "Licenses", href: "/" },
   ],
 };

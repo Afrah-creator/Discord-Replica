@@ -11,7 +11,7 @@ const actions = [
   { icon: UserPlus, name: "Add Friends", desc: "Find and connect with people", href: "/auth", primary: false, requiresAuth: true },
   { icon: Users, name: "Join a Server", desc: "Use an invite code", href: "/auth", primary: false, requiresAuth: true },
   { icon: MessageSquare, name: "Start Chatting", desc: "Send your first message", href: "/app", primary: false, requiresAuth: true },
-  { icon: Shield, name: "Stay Safe", desc: "Built-in moderation tools", href: "/#safety", primary: false, requiresAuth: false },
+  { icon: Shield, name: "Stay Safe", desc: "Built-in moderation tools", href: "#safety", primary: false, requiresAuth: false },
   { icon: ArrowRight, name: "Open N8", desc: "Jump right in", href: "/app", primary: true, requiresAuth: true },
 ];
 

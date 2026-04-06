@@ -64,7 +64,7 @@ const sections: AlternatingSection[] = [
     description: "Upload custom emoji and stickers for your server. Use animated emoji, search GIFs, and react to messages with your favourites.",
     image: sectionEmoji,
     secondaryImage: sectionGamingChat,
-    cta: { label: "See All Features", href: "/#features" },
+    cta: { label: "See All Features", href: "#features" },
   },
   {
     title: "KEEP DISCUSSIONS ORGANIZED WITH FORUMS",

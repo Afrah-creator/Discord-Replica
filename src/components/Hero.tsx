@@ -33,7 +33,7 @@ export default function Hero() {
         </div>
         <div style={{ display: "flex", gap: 32 }}>
           {["Download", "Nitro", "Discover", "Safety", "Support"].map((link) => (
-            <a key={link} href={`/#${link.toLowerCase()}`} style={{ color: "#949ba4", textDecoration: "none", fontSize: 16 }}>
+            <a key={link} href={`#${link.toLowerCase()}`} style={{ color: "#949ba4", textDecoration: "none", fontSize: 16 }}>
               {link}
             </a>
           ))}
