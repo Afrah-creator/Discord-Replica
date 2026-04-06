@@ -25,33 +25,54 @@ const withTimeout = async <T,>(promise: Promise<T>, ms: number, message: string)
   }
 };
 
+let profileEnsurePromise: Promise<void> | null = null;
+
 const ensureProfileForUser = async (user: User | null) => {
   if (!user) return;
+  if (profileEnsurePromise) {
+    await profileEnsurePromise;
+    return;
+  }
   const email = user.email ?? "";
   const fallbackName = email ? email.split("@")[0] : "user";
   const username = (user.user_metadata?.username as string | undefined) || fallbackName;
   const displayName = (user.user_metadata?.display_name as string | undefined) || username;
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("id", user.id)
-    .maybeSingle();
+  profileEnsurePromise = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
 
-  if (error) {
-    console.warn("Profile lookup failed:", error.message);
-    return;
-  }
-  if (data) return;
+      if (error) {
+        console.warn("Profile lookup failed:", error.message);
+        return;
+      }
+      if (data) return;
 
-  const { error: insertError } = await supabase.from("profiles").insert({
-    id: user.id,
-    username,
-    display_name: displayName,
-  });
-  if (insertError) {
-    console.warn("Profile create failed:", insertError.message);
-  }
+      const { error: insertError } = await supabase.from("profiles").insert({
+        id: user.id,
+        username,
+        display_name: displayName,
+      });
+      if (insertError) {
+        console.warn("Profile create failed:", insertError.message);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Profile create failed.";
+      if (message.toLowerCase().includes("lock")) {
+        console.warn("Profile create delayed due to auth lock. It will retry on next auth event.");
+      } else {
+        console.warn(message);
+      }
+    } finally {
+      profileEnsurePromise = null;
+    }
+  })();
+
+  await profileEnsurePromise;
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -67,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (ignore) return;
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      await ensureProfileForUser(newSession?.user ?? null);
+      void ensureProfileForUser(newSession?.user ?? null);
       if (!initialHandled || event === "INITIAL_SESSION") {
         initialHandled = true;
         setLoading(false);
