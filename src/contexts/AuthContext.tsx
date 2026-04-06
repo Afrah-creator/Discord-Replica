@@ -63,19 +63,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let ignore = false;
 
     const init = async () => {
-      const { data, error } = await withTimeout(
-        supabase.auth.getSession(),
-        8000,
-        "Auth session check timed out. Please check your network and Supabase config."
-      );
-      if (ignore) return;
-      if (error) {
-        console.error("Failed to get session:", error.message);
+      try {
+        const { data, error } = await withTimeout(
+          supabase.auth.getSession(),
+          12000,
+          "Auth session check timed out. Please check your network and Supabase config."
+        );
+        if (ignore) return;
+        if (error) {
+          console.error("Failed to get session:", error.message);
+        }
+        setSession(data.session ?? null);
+        setUser(data.session?.user ?? null);
+        await ensureProfileForUser(data.session?.user ?? null);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Auth session check failed.";
+        console.error(message);
+        setSession(null);
+        setUser(null);
+      } finally {
+        if (!ignore) setLoading(false);
       }
-      setSession(data.session ?? null);
-      setUser(data.session?.user ?? null);
-      await ensureProfileForUser(data.session?.user ?? null);
-      setLoading(false);
     };
 
     init();
