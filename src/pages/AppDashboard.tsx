@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus, Hash, Volume2, Settings, Send, Mic, Headphones, Users, UserPlus, LogOut, Copy, Home, Phone } from "lucide-react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -206,8 +206,7 @@ const AppDashboard = () => {
     return <div className="flex h-screen items-center justify-center bg-background text-foreground">Loading...</div>;
   }
   if (!user) {
-    navigate("/auth");
-    return null;
+    return <Navigate to="/auth" replace />;
   }
 
   return (
