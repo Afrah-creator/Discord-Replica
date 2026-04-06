@@ -24,20 +24,15 @@ const Invite = () => {
     const join = async () => {
       setStatus("joining");
       try {
-        const { data: server, error: findErr } = await supabase
-          .from("servers")
-          .select("id, name")
-          .eq("invite_code", code)
-          .maybeSingle();
-        if (findErr) throw findErr;
+        const { data, error } = await supabase.rpc("join_server_by_invite", {
+          p_invite_code: code,
+        });
+        if (error) throw error;
+        const server = Array.isArray(data) ? data[0] : data;
         if (!server) throw new Error("Invalid invite code");
-        setServerName(server.name);
-        const { error: joinErr } = await supabase
-          .from("server_members")
-          .insert({ server_id: server.id, user_id: user.id });
-        if (joinErr && joinErr.code !== "23505") throw joinErr;
+        setServerName(server.server_name || server.name);
         setStatus("done");
-        toast.success(`Joined "${server.name}"`);
+        toast.success(`Joined "${server.server_name || server.name}"`);
         navigate("/app");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to join server";

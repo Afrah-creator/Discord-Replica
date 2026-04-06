@@ -73,30 +73,17 @@ const ServerModal = ({ isOpen, onClose, onServerCreated, initialStep, initialInv
     if (!user || !inviteCode.trim()) return;
     setLoading(true);
     try {
-      const { data: server, error: findErr } = await supabase
-        .from("servers")
-        .select("id, name, invite_code")
-        .eq("invite_code", inviteCode.trim())
-        .maybeSingle();
-      if (findErr) throw findErr;
+      const { data, error } = await supabase.rpc("join_server_by_invite", {
+        p_invite_code: inviteCode.trim(),
+      });
+      if (error) throw error;
+      const server = Array.isArray(data) ? data[0] : data;
       if (!server) {
         toast.error("Invalid invite code");
         setLoading(false);
         return;
       }
-      const { error: joinErr } = await supabase.from("server_members").insert({
-        server_id: server.id,
-        user_id: user.id,
-      });
-      if (joinErr) {
-        if (joinErr.code === "23505") {
-          toast.info("You're already in this server!");
-        } else {
-          throw joinErr;
-        }
-      } else {
-        toast.success(`Joined "${server.name}"!`);
-      }
+      toast.success(`Joined "${server.server_name || server.name}"!`);
       onServerCreated?.(server || undefined);
       handleClose();
     } catch (err: Error) {
