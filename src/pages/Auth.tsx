@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "/logo.png";
 
@@ -57,9 +56,8 @@ const Auth = () => {
   const onSubmit = async (data: AuthFormData) => {
     try {
       if (isLogin) {
-        await signIn(data.email, data.password);
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
+        const session = await signIn(data.email, data.password);
+        if (!session) {
           toast.error("Login not completed. Please check your email verification or credentials.");
           return;
         }
@@ -72,9 +70,8 @@ const Auth = () => {
         }
         navigate("/app");
       } else {
-        await signUp(data.email, data.password, data.username!);
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
+        const session = await signUp(data.email, data.password, data.username!);
+        if (!session) {
           toast.info("Account created. Please check your email to confirm before logging in.");
           return;
         }

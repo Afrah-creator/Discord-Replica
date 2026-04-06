@@ -6,8 +6,8 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, username: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, username: string) => Promise<Session | null>;
+  signIn: (email: string, password: string) => Promise<Session | null>;
   signOut: () => Promise<void>;
 }
 
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
-      const { error } = await withTimeout(
+      const { data, error } = await withTimeout(
         supabase.auth.signUp({
         email,
         password,
@@ -116,6 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "Sign up timed out. Please try again."
       );
       if (error) throw new Error(error.message);
+      return data.session ?? null;
     } finally {
       setLoading(false);
     }
@@ -124,12 +125,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const { error } = await withTimeout(
+      const { data, error } = await withTimeout(
         supabase.auth.signInWithPassword({ email, password }),
         12000,
         "Sign in timed out. Please check your network and try again."
       );
       if (error) throw new Error(error.message);
+      return data.session ?? null;
     } finally {
       setLoading(false);
     }
@@ -163,8 +165,8 @@ export const useAuth = () => {
       session: null,
       user: null,
       loading: false,
-      signUp: async () => {},
-      signIn: async () => {},
+      signUp: async () => null,
+      signIn: async () => null,
       signOut: async () => {},
     };
   }
