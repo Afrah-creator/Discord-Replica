@@ -23,7 +23,7 @@ app.post("/invite/send", async (req, res) => {
     return res.status(400).send("Missing required fields");
   }
 
-  const inviteLink = `${publicAppUrl}/auth?invite=${inviteCode}`;
+  const inviteLink = `${publicAppUrl}/#/auth?invite=${inviteCode}`;
   const message = `You're invited to join "${serverName}" on N8. Join here: ${inviteLink}`;
 
   try {

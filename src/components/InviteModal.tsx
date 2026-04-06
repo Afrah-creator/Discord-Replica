@@ -19,7 +19,7 @@ const InviteModal = ({ isOpen, onClose, serverId, serverName, inviteCode }: Invi
 
   const inviteLink = useMemo(() => {
     const base = import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin;
-    return inviteCode ? `${base}/auth?invite=${inviteCode}` : base;
+    return inviteCode ? `${base}/#/auth?invite=${inviteCode}` : base;
   }, [inviteCode]);
 
   const handleCopy = async () => {
