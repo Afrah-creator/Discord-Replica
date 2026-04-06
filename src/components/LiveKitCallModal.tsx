@@ -58,7 +58,18 @@ const LiveKitCallModal = ({ isOpen, onClose, room, identity, name }: LiveKitCall
 
           <div className="w-full h-full">
             {token && url ? (
-              <LiveKitRoom token={token} serverUrl={url} connect className="h-full">
+              <LiveKitRoom
+                token={token}
+                serverUrl={url}
+                connect
+                audio
+                video
+                data-lk-theme="default"
+                className="h-full"
+                onDisconnected={() => {
+                  toast.info("Call ended");
+                }}
+              >
                 <VideoConference />
               </LiveKitRoom>
             ) : error ? (

@@ -125,6 +125,26 @@ const AppDashboard = () => {
     },
   });
 
+  // Real-time member changes for current server
+  useEffect(() => {
+    if (!activeServer) return;
+    const channel = supabase
+      .channel(`server-members-${activeServer}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "server_members", filter: `server_id=eq.${activeServer}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["members", activeServer] });
+          queryClient.invalidateQueries({ queryKey: ["servers", user?.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeServer, queryClient, user?.id]);
+
   // Real-time presence per server
   useEffect(() => {
     if (!activeServer || !user) return;
