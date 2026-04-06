@@ -9,6 +9,7 @@ const Invite = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [status, setStatus] = useState<"idle" | "joining" | "done" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [serverName, setServerName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ const Invite = () => {
       setStatus("joining");
       try {
         const { data, error } = await supabase.rpc("join_server_by_invite", {
-          p_invite_code: code,
+          p_invite_code: code.toUpperCase(),
         });
         if (error) throw error;
         const server = Array.isArray(data) ? data[0] : data;
@@ -37,6 +38,7 @@ const Invite = () => {
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to join server";
         setStatus("error");
+        setErrorMessage(message);
         toast.error(message);
       }
     };
@@ -50,7 +52,11 @@ const Invite = () => {
         <h1 className="text-2xl font-bold mb-2">Server Invite</h1>
         {status === "joining" && <p className="text-muted-foreground">Joining {serverName || "server"}...</p>}
         {status === "done" && <p className="text-muted-foreground">Success! Redirecting to your server...</p>}
-        {status === "error" && <p className="text-destructive">Invite failed. Please check the link.</p>}
+        {status === "error" && (
+          <p className="text-destructive">
+            Invite failed. {errorMessage ? errorMessage : "Please check the link."}
+          </p>
+        )}
         {status === "idle" && <p className="text-muted-foreground">Preparing invite...</p>}
       </div>
     </div>

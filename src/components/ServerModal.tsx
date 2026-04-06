@@ -74,7 +74,7 @@ const ServerModal = ({ isOpen, onClose, onServerCreated, initialStep, initialInv
     setLoading(true);
     try {
       const { data, error } = await supabase.rpc("join_server_by_invite", {
-        p_invite_code: inviteCode.trim(),
+        p_invite_code: inviteCode.trim().toUpperCase(),
       });
       if (error) throw error;
       const server = Array.isArray(data) ? data[0] : data;
