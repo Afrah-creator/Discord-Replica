@@ -25,6 +25,35 @@ const withTimeout = async <T,>(promise: Promise<T>, ms: number, message: string)
   }
 };
 
+const ensureProfileForUser = async (user: User | null) => {
+  if (!user) return;
+  const email = user.email ?? "";
+  const fallbackName = email ? email.split("@")[0] : "user";
+  const username = (user.user_metadata?.username as string | undefined) || fallbackName;
+  const displayName = (user.user_metadata?.display_name as string | undefined) || username;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Profile lookup failed:", error.message);
+    return;
+  }
+  if (data) return;
+
+  const { error: insertError } = await supabase.from("profiles").insert({
+    id: user.id,
+    username,
+    display_name: displayName,
+  });
+  if (insertError) {
+    console.warn("Profile create failed:", insertError.message);
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -45,14 +74,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       setSession(data.session ?? null);
       setUser(data.session?.user ?? null);
+      await ensureProfileForUser(data.session?.user ?? null);
       setLoading(false);
     };
 
     init();
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
+      await ensureProfileForUser(newSession?.user ?? null);
       setLoading(false);
     });
 

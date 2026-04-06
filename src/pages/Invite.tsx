@@ -3,11 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Invite = () => {
   const { code } = useParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState<"idle" | "joining" | "done" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [serverName, setServerName] = useState<string | null>(null);
@@ -34,6 +36,8 @@ const Invite = () => {
         setServerName(server.server_name || server.name);
         setStatus("done");
         toast.success(`Joined "${server.server_name || server.name}"`);
+        queryClient.invalidateQueries({ queryKey: ["servers"] });
+        queryClient.invalidateQueries({ queryKey: ["members"] });
         navigate("/app");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to join server";

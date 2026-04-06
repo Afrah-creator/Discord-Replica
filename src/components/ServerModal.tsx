@@ -59,6 +59,14 @@ const ServerModal = ({ isOpen, onClose, onServerCreated, initialStep, initialInv
         .select("id, name, invite_code")
         .single();
       if (error) throw error;
+      await supabase.from("server_members").upsert(
+        {
+          server_id: data.id,
+          user_id: user.id,
+          role: "owner",
+        },
+        { onConflict: "server_id,user_id" }
+      );
       toast.success(`Server "${serverName}" created!`);
       onServerCreated?.(data || undefined);
       handleClose();
