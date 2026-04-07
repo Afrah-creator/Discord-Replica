@@ -203,7 +203,7 @@ npm start
 | Frontend Dev | [Your Name] |
 | Backend Dev | [Your Name] |
 | DSA Implementation | [Your Name] |
-| Documentation | [Your Name] |
+| Documentation | [Afrah] |
 | Video Demo | [Your Name] |
 
 ---
